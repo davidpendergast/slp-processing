@@ -1,5 +1,3 @@
-import datetime
-import sys
 import os
 import argparse
 import traceback
@@ -11,22 +9,14 @@ import re
 
 import utils
 
-# need newer (unpublished) version of py-slippi, for skip_frames option.
-sys.path.append("py-slippi/")
-import slippi
-import slippi.id as slippi_id
-import slippi.event as slippi_event
-
-
-# if true, processing will go faster but win/lose results won't be included.
-SKIP_FRAMES = False
+import slippi  # py-slippi, parsing library for slp files
 
 
 def calc_new_filename(fpath) -> typing.Union[str, None]:
     if not fpath.endswith('.slp'):
         return None
     try:
-        game = slippi.Game(fpath, skip_frames=SKIP_FRAMES)
+        game = slippi.Game(fpath)
     except IOError:
         return None
 
@@ -49,11 +39,11 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
 
     stage = _get_stage_code(game.start.stage)
 
-    if game.end.method == slippi_event.End.Method.NO_CONTEST:
+    if game.end.method == slippi.event.End.Method.NO_CONTEST:
         endstate = "_quit"
-    elif game.end.method == slippi_event.End.Method.TIME:
+    elif game.end.method == slippi.event.End.Method.TIME:
         endstate = "_time"
-    elif game.end.method == slippi_event.End.Method.INCONCLUSIVE:
+    elif game.end.method == slippi.event.End.Method.INCONCLUSIVE:
         endstate = "_draw"
     else:
         endstate = ""
@@ -62,12 +52,12 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
 
 
 STAGE_MAPPINGS = {
-    slippi_id.Stage.BATTLEFIELD: "BF",
-    slippi_id.Stage.DREAM_LAND_N64: "DL",
-    slippi_id.Stage.FINAL_DESTINATION: "FD",
-    slippi_id.Stage.FOUNTAIN_OF_DREAMS: "FoD",
-    slippi_id.Stage.POKEMON_STADIUM: "PS",
-    slippi_id.Stage.YOSHIS_STORY: "YS",
+    slippi.id.Stage.BATTLEFIELD: "BF",
+    slippi.id.Stage.DREAM_LAND_N64: "DL",
+    slippi.id.Stage.FINAL_DESTINATION: "FD",
+    slippi.id.Stage.FOUNTAIN_OF_DREAMS: "FoD",
+    slippi.id.Stage.POKEMON_STADIUM: "PS",
+    slippi.id.Stage.YOSHIS_STORY: "YS",
 }
 
 
@@ -79,14 +69,14 @@ def _get_stage_code(stage_enum):
 
 
 CHAR_MAPPINGS = {  # shorten the long ones
-    slippi_id.CSSCharacter.CAPTAIN_FALCON: "FALCON",
-    slippi_id.CSSCharacter.DONKEY_KONG: "DK",
-    slippi_id.CSSCharacter.DR_MARIO: "DOC",
-    slippi_id.CSSCharacter.GAME_AND_WATCH: "GNW",
-    slippi_id.CSSCharacter.GANONDORF: "GANON",
-    slippi_id.CSSCharacter.ICE_CLIMBERS: "ICIES",
-    slippi_id.CSSCharacter.JIGGLYPUFF: "PUFF",
-    slippi_id.CSSCharacter.YOUNG_LINK: "YLINK"
+    slippi.id.CSSCharacter.CAPTAIN_FALCON: "FALCON",
+    slippi.id.CSSCharacter.DONKEY_KONG: "DK",
+    slippi.id.CSSCharacter.DR_MARIO: "DOC",
+    slippi.id.CSSCharacter.GAME_AND_WATCH: "GNW",
+    slippi.id.CSSCharacter.GANONDORF: "GANON",
+    slippi.id.CSSCharacter.ICE_CLIMBERS: "ICIES",
+    slippi.id.CSSCharacter.JIGGLYPUFF: "PUFF",
+    slippi.id.CSSCharacter.YOUNG_LINK: "YLINK"
 }
 
 
@@ -101,7 +91,7 @@ def _get_player_text(game, port):
     pdata = game.start.players[port]
     if pdata is None:
         return None
-    elif pdata.type != slippi_event.Start.Player.Type.HUMAN:  # 0:HUMAN
+    elif pdata.type != slippi.event.Start.Player.Type.HUMAN:  # 0:HUMAN
         return "CPU"
     else:
         charcode = _get_character_code(pdata.character)
