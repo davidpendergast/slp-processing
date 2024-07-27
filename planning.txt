@@ -1,0 +1,50 @@
+
+
+## Procedure:
+
+1. Put raw slp files into directory, split by USBs:
+    dir/
+        usb1/
+            xxx1.slp, xxx2.slp, xxx3.slp, ...
+        usb2/
+            xxx1.slp, xxx2.slp, xxx3.slp, ...
+        ...
+
+2. Run renaming tool, which chooses new names for the slps:
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF_LRAst.slp
+    YYYYMMDDTHHMM = timestamp
+                 _XXX = player 1 character name
+                     X = color index
+                      (X = W if they won the game, L if they lost
+                        X) = stocks remaining (so W4 = won with a 4-stock)
+                          _vs_XXX# = player 2 character / color
+                                  (XXXX) = optional, player 2 tag
+                                        (XX) = player 2 win/lose status
+                                            _MmSS = game duration (minutes, seconds)
+                                                 _XX = stage
+                                                    _LRASt = optional, if early quit-out
+
+3. And copies them to a new directory, maintianing the original folder structure.
+
+4. User manually finds the slps they care about, arranges them into a "spec file":
+
+    NMM #25 Vinsanity vs. Ghast (Pools)
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+
+    NMM #25 Holiday vs. Sp1nda (WF)
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+    20240725T1856_Shk3(W2)_vs_CFn2(GHST)(L0)_3m12_BF.slp
+
+5. Run video combiner tool on file, which renders an mp4 for each set.
+6. (Optional) Generate thumbnails and metadata for each set as well.
+7. Bulk upload to youtube.
+
+#################################
+
+Ideally the only manual parts of the process are:
+a. Downloading the raw slps from the usb sticks (kinda unavoidable).
+b. Writing the spec file.
+c. Uploading the vods to youtube (unclear whether this is automatable).
