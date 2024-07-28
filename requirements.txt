@@ -1,1 +1,2 @@
 py-slippi>=1.6.2
+psutil>=6.0.0
