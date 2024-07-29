@@ -35,7 +35,7 @@ def parse_spec_file(fpath):
                 cur_name = line.strip()
                 cur_files = []
             else:
-                # should be a path to an SLP
+                # should be a path to an slp
                 if line.startswith("\""):
                     line = line[1:]
                 if line.endswith("\""):
@@ -54,7 +54,7 @@ def parse_spec_file(fpath):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("slp video creator")
-    parser.add_argument("-spec", help="Text file containing the list of sets", type=str)
+    parser.add_argument("-spec", help="text file containing the list of sets", type=str)
     parser.add_argument("-dest", help="directory to write the mp4s", type=str)
 
     args = parser.parse_args()
@@ -72,35 +72,32 @@ if __name__ == "__main__":
     if not utils.ask_yes_or_no_question("Create videos?"):
         raise SystemExit
 
+    conf = slp2mp4.Config('config.json')
+
+    fails = []
     for v in vids:
-        tempdir = tempfile.mkdtemp(prefix='slp_videomaker')
         try:
-            # copy the SLPs to a temp directory
-            for slpfile in v.filepaths:
-                fname = os.path.split(slpfile)[1]
-                shutil.copy2(slpfile, os.path.join(tempdir, fname))
+            # sort by filename which should start with the timestamp
+            sorted_filepaths = sorted(v.filepaths, key=lambda x: os.path.split(x)[1])
 
             outfile = os.path.join(dest_dir, v.get_output_filename())
-            args = ["dummy", tempdir, outfile]
-            print(f"Running slp-to-mp4.py {' '.join(args)}")
-            slp2mp4.main(args=args)
+            slp2mp4.record_and_combine_slps(conf, sorted_filepaths, outfile)
 
             if os.path.exists(outfile):
                 bytesize = os.path.getsize(outfile)
                 print(f"  Created {outfile} successfully ({int(bytesize / 1e6)} MB)")
             else:
-                raise ValueError(f"slp-to-mp4.py didn't create {outfile}")
+                raise ValueError(f"Didn't throw an error, but failed to create {outfile}")
         except Exception as e:
             print(f"ERROR failed to create video for set: {v.name}")
+            fails.append(v)
             traceback.print_exc()
-        finally:
-            try:
-                shutil.rmtree(tempdir)
-            except IOError:
-                print(f"ERROR failed to clean up temp directory: {tempdir}")
-                traceback.print_exc()
 
-
+    if len(fails) > 0:
+        print(f"\nFailed to process {len(fails)} set(s):\n"
+              f"{'\n'.join([v.name for v in fails])}")
+    else:
+        print(f"\nSuccessfully processed all {len(vids)} set(s)")
 
 
 

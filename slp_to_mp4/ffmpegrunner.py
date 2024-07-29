@@ -1,12 +1,15 @@
 import subprocess
 
+
 class FfmpegRunner:
+
     def __init__(self, ffmpeg_bin):
         self.ffmpeg_bin = ffmpeg_bin
 
     def combine(self, concat_file, outfile):
         cmd = [
             self.ffmpeg_bin,
+            '-y',                       # Overwrite automatically
             '-safe', '0',
             '-f', 'concat',             # Set input stream to concatenate
             '-i', concat_file,          # use a concatenation demuxer file which contains a list of files to combine

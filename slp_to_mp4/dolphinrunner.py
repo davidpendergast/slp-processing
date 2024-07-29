@@ -3,13 +3,15 @@ import os, sys, subprocess, time, shutil, uuid, json, configparser
 MAX_WAIT_SECONDS = 8 * 60 + 30
 RESOLUTION_DICT = {'480p': '2', '720p': '3', '1080p': '5', '1440p': '6', '2160p': '8'}
 
+
 class CommFile:
+
     def __init__(self, comm_path, slp_file, job_id):
         self.comm_data = {
             'mode': 'normal',                       # idk
             'replay': slp_file,
             'isRealTimeMode': False,                # idk
-            'commandId': str(job_id)           # can be any random string, stops dolphin getting confused playing same file twice in a row
+            'commandId': str(job_id)                # unique id for the job
         }
         self.comm_path = comm_path
 
@@ -22,6 +24,7 @@ class CommFile:
         # Re-raise any exception that occurred in the with block
         if tb is not None:
             return False
+
 
 class DolphinRunner:
 
@@ -229,11 +232,11 @@ class DolphinRunner:
 
             # Construct command string and run dolphin
             cmd = [
-                self.conf.dolphin_bin,
-                '-i', self.comm_file,       # The comm file tells dolphin which slippi file to play (see above)
-                '-b',                       # Exit dolphin when emulation ends
-                '-e', self.conf.melee_iso,  # ISO to use
-                '-u', self.user_dir         # specify User dir
+                self.conf.path_to_dolphin_exe,
+                '-i', self.comm_file,               # The comm file tells dolphin which slippi file to play (see above)
+                '-b',                               # Exit dolphin when emulation ends
+                '-e', self.conf.path_to_melee_iso,  # ISO to use
+                '-u', self.user_dir                 # specify User dir
                 ]
             print(' '.join(cmd))
             # TODO run faster than realtime if possible

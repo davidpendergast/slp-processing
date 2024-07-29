@@ -1,35 +1,36 @@
-import os, json, sys
+import os, json
 import shutil
+import psutil
 
-THIS_DIR, _ = os.path.split(os.path.abspath(__file__))
 
-if sys.platform == "win32":
-    THIS_CONFIG = os.path.join(THIS_DIR, 'config_windows.json')
-    DOLPHIN_NAME = 'Dolphin.exe'
-else:
-    THIS_CONFIG = os.path.join(THIS_DIR, 'config.json')
-    DOLPHIN_NAME = 'dolphin-emu'
+def check_path(path):
+    if not os.path.exists(path):
+        raise RuntimeError("{} does not exist".format(path))
+
 
 class Config:
-    def __init__(self):
-        with open(THIS_CONFIG, 'r') as f:
+
+    def __init__(self, path_to_config):
+        with open(path_to_config, 'r') as f:
             j = json.loads(f.read())
-            self.melee_iso = os.path.expanduser(j['melee_iso'])
-            self.check_path(self.melee_iso)
-            self.dolphin_dir = os.path.expanduser(j['dolphin_dir'])
-            self.check_path(self.dolphin_dir)
+
+            self.path_to_melee_iso = os.path.expanduser(j['path_to_melee_iso'])
+            self.path_to_dolphin_exe = os.path.expanduser(j['path_to_dolphin_exe'])
             self.ffmpeg = os.path.expanduser(shutil.which(j['ffmpeg']))
-            self.check_path(self.ffmpeg)
+
+            check_path(self.path_to_melee_iso)
+            check_path(self.path_to_dolphin_exe)
+            check_path(self.ffmpeg)
+
             self.resolution = j['resolution']
             self.widescreen = j['widescreen']
             self.bitrateKbps = j['bitrateKbps']
-            self.parallel_games = j['parallel_games']
-            self.remove_short = j['remove_short']
-            self.combine = j['combine']
+            self.parallel_games = _calc_num_processes(j['parallel_games'])
+            self.extra_frames = j['extra_frames']
 
-        self.dolphin_bin = os.path.join(self.dolphin_dir, DOLPHIN_NAME)
-        self.check_path(self.dolphin_bin)
 
-    def check_path(self, path):
-        if not os.path.exists(path):
-            raise RuntimeError("{} does not exist".format(path))
+def _calc_num_processes(val):
+    if val == "recommended":
+        return psutil.cpu_count(logical=False)
+    else:
+        return int(val)
