@@ -49,7 +49,12 @@ def combine_mp4s(conf: Config, mp4list, outfile):
 
     tempdir = tempfile.mkdtemp()
     concat_fpath = os.path.join(tempdir, "concat_file.txt")
+
     try:
+        outfile_parent_dir = os.path.split(outfile)[0]
+        if not os.path.exists(outfile_parent_dir):
+            os.makedirs(outfile_parent_dir, exist_ok=True)
+
         lines = []
         for f in mp4list:
             if not os.path.exists(f):

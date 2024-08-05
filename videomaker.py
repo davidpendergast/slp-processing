@@ -94,8 +94,9 @@ if __name__ == "__main__":
             traceback.print_exc()
 
     if len(fails) > 0:
+        newline = '\n'
         print(f"\nFailed to process {len(fails)} set(s):\n"
-              f"{'\n'.join([v.name for v in fails])}")
+              f"{newline.join([v.name for v in fails])}")
     else:
         print(f"\nSuccessfully processed all {len(vids)} set(s)")
 
