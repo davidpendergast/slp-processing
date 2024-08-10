@@ -16,7 +16,7 @@ def record_slp(conf: Config, slp_file, outfile):
     :param outfile: mp4 filepath to create.
     """
     # Parse file with py-slippi to determine number of frames
-    slippi_game = Game(slp_file)
+    slippi_game = Game(slp_file)  # TODO parse without reading frames
     num_frames = slippi_game.metadata.duration + conf.extra_frames
 
     dolphin_dir = os.path.split(conf.path_to_dolphin_exe)[0]

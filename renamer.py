@@ -18,6 +18,7 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
     try:
         game = slippi.Game(fpath)
     except IOError:
+        traceback.print_exc()
         return None
 
     date = game.metadata.date.strftime('%Y%m%d')
@@ -122,11 +123,14 @@ def _lookup_enum(enum_cls, name) -> enum.IntEnum:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("slp renamer")
     parser.add_argument("-src", help="Root directory of raw slp files", type=str)
-    parser.add_argument("-dest", help="directory to write the renamed files", type=str)
+    parser.add_argument("-dest", help="directory to write the renamed files", type=str, required=False)
 
     args = parser.parse_args()
     src_dir = args.src
-    dest_dir = args.dest
+    if args.dest is not None:
+        dest_dir = args.dest
+    else:
+        dest_dir = os.path.join(os.path.split(src_dir)[0], "renamed")
     print(f"\nWelcome to SLP Renamer\n  input directory: {src_dir}\n  output directory: {dest_dir}\n")
 
     unique_subdirs = set()
