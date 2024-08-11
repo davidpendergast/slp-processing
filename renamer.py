@@ -1,4 +1,5 @@
 import os
+import sys
 import argparse
 import traceback
 import typing
@@ -9,15 +10,26 @@ import re
 
 import utils
 
+# need newer (unpublished) version of py-slippi, for skip_frames option.
+sys.path.append("py-slippi/")
 import slippi  # py-slippi, parsing library for slp files
 
 
 def calc_new_filename(fpath) -> typing.Union[str, None]:
     if not fpath.endswith('.slp'):
         return None
+
     try:
         game = slippi.Game(fpath)
-    except IOError:
+    except IOError as e:
+        # try:
+        #     # try to parse without frames - sometimes SLPs are corrupted
+        #     # in such a way where the basic metadata can be parsed but
+        #     # the frames can't. This means we can't get win/loss info
+        #     # but better than nothing.
+        #     game = slippi.Game(fpath, skip_frames=True)
+        # except IOError:
+        print(f"ERROR: failed to parse: {fpath}")
         traceback.print_exc()
         return None
 

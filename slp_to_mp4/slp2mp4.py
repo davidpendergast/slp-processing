@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-import os, shutil, uuid, multiprocessing, tempfile, traceback
+import os, sys, shutil, uuid, multiprocessing, tempfile, traceback
+
+# need newer (unpublished) version of py-slippi, for skip_frames option.
+sys.path.append("py-slippi/")
 from slippi import Game
+
 from slp_to_mp4.config import Config
 from slp_to_mp4.dolphinrunner import DolphinRunner
 from slp_to_mp4.ffmpegrunner import FfmpegRunner
