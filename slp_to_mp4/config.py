@@ -3,9 +3,11 @@ import shutil
 import psutil
 
 
-def check_path(path):
+def check_path(name, path):
+    if path.startswith("SET THIS TO"):
+        raise RuntimeError(f"Please edit config.json and set a path for: {name}")
     if not os.path.exists(path):
-        raise RuntimeError("{} does not exist".format(path))
+        raise RuntimeError(f"config.json's {name} path does not exist: {path}")
 
 
 class Config:
@@ -18,9 +20,9 @@ class Config:
             self.path_to_dolphin_exe = os.path.expanduser(j['path_to_dolphin_exe'])
             self.ffmpeg = os.path.expanduser(shutil.which(j['ffmpeg']))
 
-            check_path(self.path_to_melee_iso)
-            check_path(self.path_to_dolphin_exe)
-            check_path(self.ffmpeg)
+            check_path('path_to_melee_iso', self.path_to_melee_iso)
+            check_path('path_to_dolphin_exe', self.path_to_dolphin_exe)
+            check_path('ffmpeg', self.ffmpeg)
 
             self.resolution = j['resolution']
             self.widescreen = j['widescreen']

@@ -1,6 +1,6 @@
 {
-    "path_to_melee_iso": "C:/Users/david/Documents/My Games/ISOs/SSBM/Super Smash Bros. Melee (USA) (En,Ja) (v1.02)/Super Smash Bros. Melee (USA) (En,Ja) (v1.02).iso",
-    "path_to_dolphin_exe": "C:/Users/david/AppData/Roaming/Slippi Launcher/playback/Slippi Dolphin.exe",
+    "path_to_melee_iso": "SET THIS TO: path/to/melee_iso.iso",
+    "path_to_dolphin_exe": "SET THIS TO: path/to/Slippi Dolphin.exe",
     "ffmpeg": "ffmpeg",
     "resolution": "720p",
     "widescreen": false,

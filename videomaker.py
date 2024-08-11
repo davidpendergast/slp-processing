@@ -72,7 +72,7 @@ if __name__ == "__main__":
     if not utils.ask_yes_or_no_question("Create videos?"):
         raise SystemExit
 
-    conf = slp2mp4.Config('config.json')
+    conf = slp2mp4.Config('my_config.json' if os.path.exists('my_config.json') else 'config.json')
 
     fails = []
     for v in vids:
