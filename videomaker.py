@@ -3,12 +3,15 @@ import os
 import tempfile
 import shutil
 import traceback
+import typing
+from functools import total_ordering
 
 import slp_to_mp4.slp2mp4 as slp2mp4
 
 import utils
 
 
+@total_ordering
 class MeleeSet:
 
     def __init__(self, name, filepaths):
@@ -16,10 +19,20 @@ class MeleeSet:
         self.filepaths = filepaths
 
     def get_output_filename(self):
-        return f"{self.name}.mp4"  # TODO rm special chars and such
+        # remove special chars and such
+        safe_string = "".join(c for c in self.name if c.isalpha()
+                              or c.isdigit()
+                              or c in ' _()').strip()
+        return f"{safe_string}.mp4"
+
+    def __lt__(self, other: 'MeleeSet'):
+        # sort by filenames, which should begin with timestamps
+        my_filenames = list(map(lambda fpath: os.path.split(fpath)[1], self.filepaths))
+        other_filenames = list(map(lambda fpath: os.path.split(fpath)[1], other.filepaths))
+        return my_filenames < other_filenames
 
 
-def parse_spec_file(fpath):
+def parse_spec_file(fpath) -> typing.List[MeleeSet]:
     res = []
     with open(fpath) as file:
         cur_name = None
@@ -35,7 +48,7 @@ def parse_spec_file(fpath):
                 cur_name = line.strip()
                 cur_files = []
             else:
-                # should be a path to an slp
+                # should be a path to a slp file
                 if line.startswith("\""):
                     line = line[1:]
                 if line.endswith("\""):
@@ -49,6 +62,7 @@ def parse_spec_file(fpath):
 
     if cur_name is not None and len(cur_files) > 0:
         res.append(MeleeSet(cur_name, cur_files))
+    res.sort()  # sort chronologically
     return res
 
 
@@ -99,44 +113,5 @@ if __name__ == "__main__":
               f"{newline.join([v.name for v in fails])}")
     else:
         print(f"\nSuccessfully processed all {len(vids)} set(s)")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
