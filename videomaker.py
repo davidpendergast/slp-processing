@@ -62,7 +62,8 @@ def parse_spec_file(fpath) -> typing.List[MeleeSet]:
 
     if cur_name is not None and len(cur_files) > 0:
         res.append(MeleeSet(cur_name, cur_files))
-    res.sort()  # sort chronologically
+    # TODO bad idea to sort, wii timestamps are often wrong, can we do better?
+    # res.sort()  # sort chronologically
     return res
 
 
@@ -73,7 +74,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     specfile = args.spec
-    dest_dir = args.dest
+    if args.dest is not None:
+        dest_dir = args.dest
+    else:
+        dest_dir = os.path.join(os.path.split(specfile)[0], "videos")
     print(f"\nWelcome to SLP Video Creator\n  spec file: {specfile}\n  output directory: {dest_dir}")
 
     vids = parse_spec_file(specfile)
