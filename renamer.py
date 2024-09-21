@@ -178,6 +178,8 @@ if __name__ == "__main__":
     if not proceed:
         raise SystemExit
 
+    all_created = []
+
     fail_cnt = 0
     for fpath in renames:
         fpath_out = os.path.join(dest_dir, renames[fpath])
@@ -186,12 +188,18 @@ if __name__ == "__main__":
             if not os.path.exists(out_subdir):
                 os.makedirs(out_subdir, exist_ok=True)
             shutil.copy2(fpath, fpath_out)  # try to preserve metadata
+            all_created.append(fpath_out)
         except IOError:
             print(f"Failed to copy {fpath} to {fpath_out}")
             traceback.print_stack()
             fail_cnt += 1
 
-    print(f"Successfully renamed {len(renames) - fail_cnt}/{len(all_slps)} slp files.")
+    all_created.sort()
+    print(f"\nCreated {len(all_created)} file(s):")
+    for f in all_created:
+        print(f)
+
+    print(f"\nSuccessfully renamed {len(renames) - fail_cnt}/{len(all_slps)} slp files.")
 
 
 
