@@ -74,7 +74,7 @@ STAGE_MAPPINGS = {
 }
 
 
-def _get_stage_code(stage_enum):
+def _get_stage_code(stage_enum) -> str:
     if stage_enum in STAGE_MAPPINGS:
         return STAGE_MAPPINGS[stage_enum]
     else:
@@ -93,11 +93,49 @@ CHAR_MAPPINGS = {  # shorten the long ones
 }
 
 
-def _get_character_code(char_enum):
+def _get_character_code(char_enum) -> str:
     if char_enum in CHAR_MAPPINGS:
         return CHAR_MAPPINGS[char_enum]
     else:
         return str(char_enum.name)
+
+
+CHAR_COLOR_MAPPINGS = {
+    slippi.id.CSSCharacter.CAPTAIN_FALCON: ("", "BLACK", "RED", "PINK", "GREEN", "BLUE"),
+    slippi.id.CSSCharacter.DONKEY_KONG: ("", "BLACK", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.FOX: ("", "ORANGE", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.GAME_AND_WATCH: ("", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.KIRBY: ("", "YELLOW", "BLUE", "RED", "GREEN", "WHITE"),
+    slippi.id.CSSCharacter.BOWSER: ("", "RED", "BLUE", "BLACK"),
+    slippi.id.CSSCharacter.LINK: ("GREEN", "RED", "BLUE", "BLACK", "WHITE"),
+    slippi.id.CSSCharacter.LUIGI: ("GREEN", "WHITE", "BLUE", "PINK"),
+    slippi.id.CSSCharacter.MARIO: ("RED", "YELLOW", "BROWN", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.MARTH: ("", "RED", "GREEN", "BLACK", "WHITE"),
+    slippi.id.CSSCharacter.MEWTWO: ("", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.NESS: ("RED", "YELLOW", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.PEACH: ("PINK", "DAISY", "WHITE", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.PIKACHU: ("", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.ICE_CLIMBERS: ("BLUE", "GREEN", "ORANGE", "RED"),
+    slippi.id.CSSCharacter.JIGGLYPUFF: ("", "RED", "BLUE", "GREEN", "CROWN"),
+    slippi.id.CSSCharacter.SAMUS: ("ORANGE", "PINK", "BROWN", "GREEN", "PURPLE"),
+    slippi.id.CSSCharacter.YOSHI: ("GREEN", "RED", "BLUE", "YELLOW", "PINK", "CYAN"),
+    slippi.id.CSSCharacter.ZELDA: ("", "RED", "BLUE", "GREEN", "WHITE"),
+    slippi.id.CSSCharacter.SHEIK: ("", "RED", "BLUE", "GREEN", "WHITE"),
+    slippi.id.CSSCharacter.FALCO: ("", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.YOUNG_LINK: ("GREEN", "RED", "BLUE", "WHITE", "BLACK"),
+    slippi.id.CSSCharacter.DR_MARIO: ("WHITE", "RED", "BLUE", "GREEN", "BLACK"),
+    slippi.id.CSSCharacter.ROY: ("", "RED", "BLUE", "GREEN", "YELLOW"),
+    slippi.id.CSSCharacter.PICHU: ("", "RED", "BLUE", "GREEN"),
+    slippi.id.CSSCharacter.GANONDORF: ("", "RED", "BLUE", "GREEN", "PURPLE")
+}
+
+
+def _get_character_color_code(char_enum, color_id) -> str:
+    if char_enum in CHAR_COLOR_MAPPINGS:
+        ids = CHAR_COLOR_MAPPINGS[char_enum]
+        if color_id < len(ids):
+            return ids[color_id]
+    return str(color_id)
 
 
 def _get_player_text(game, port):
@@ -108,7 +146,9 @@ def _get_player_text(game, port):
         return "CPU"
     else:
         charcode = _get_character_code(pdata.character)
-        colorcode = pdata.costume
+        colorcode = _get_character_color_code(pdata.character, pdata.costume)
+        if len(colorcode) > 0:
+            colorcode = f"({colorcode})"
 
         # tags use full-width chars, e.g. "ＧＨＳＴ", gotta normalize
         normalized_tag = unicodedata.normalize("NFKC", pdata.tag)
