@@ -30,6 +30,14 @@ class Config:
             self.parallel_games = _calc_num_processes(j['parallel_games'])
             self.extra_frames = j['extra_frames']
 
+            # Hard limit on render time per slp file.
+            # Somewhat dangerous to enable, because if the rendering runs slowly
+            # (due to system RAM overuse), it will cause the game to cutoff early.
+            # But having no limit may allow the processing to become stuck?
+            # Unclear why that might occur.
+            # TODO Should come up with a better way to detect & report freezes
+            self.max_render_time_per_slp_secs = 30 * 60
+
 
 def _calc_num_processes(val):
     if val == "recommended":

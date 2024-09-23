@@ -23,3 +23,13 @@ def ask_yes_or_no_question(question):
             answer = False
     print("")
     return answer
+
+
+def ms_to_timestamp(duration_ms) -> str:
+    duration_secs = int(duration_ms / 1000)
+    if duration_secs > 3600:
+        return (f"{duration_secs // 3600}h"
+                f"{str((duration_secs % 3600) // 60).zfill(2)}m"
+                f"{str(duration_secs % 60).zfill(2)}")
+    else:
+        return f"{duration_secs // 60}m{str(duration_secs % 60).zfill(2)}"

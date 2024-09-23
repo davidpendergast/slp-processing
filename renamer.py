@@ -1,5 +1,4 @@
 import os
-import sys
 import argparse
 import traceback
 import typing
@@ -10,9 +9,8 @@ import re
 
 import utils
 
-# need newer (unpublished) version of py-slippi, for skip_frames option.
-sys.path.append("py-slippi/")
-import slippi  # py-slippi, parsing library for slp files
+# need newer (unpublished) version of py_slippi, for skip_frames option.
+import py_slippi.slippi as slippi  # py_slippi, parsing library for slp files
 
 
 def calc_new_filename(fpath) -> typing.Union[str, None]:
@@ -47,9 +45,7 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
     else:
         player_text = "_".join(players)  # dubs?
 
-    duration_secs = int(game.metadata.duration / 60)
-    gametime = f"{duration_secs // 60}m{str(duration_secs % 60).zfill(2)}"
-
+    gametime = utils.ms_to_timestamp(int(game.metadata.duration / 60 * 1000))
     stage = _get_stage_code(game.start.stage)
 
     if game.end.method == slippi.event.End.Method.NO_CONTEST:

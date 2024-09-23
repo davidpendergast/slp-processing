@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'py-slippi'
+project = 'py_slippi'
 author = 'melkor'
 
 version = '1.6.2'
@@ -37,7 +37,7 @@ html_theme_options = {
     'description': 'Python parser for SSBM replay files',
     'fixed_sidebar': True,
     'github_button': True,
-    'github_repo': "py-slippi",
+    'github_repo': "py_slippi",
     'github_user': "hohav",
 }
 

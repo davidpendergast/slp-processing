@@ -15,7 +15,7 @@ setuptools.setup(
     install_requires=['py-ubjson', 'termcolor'],
     long_description=long_description,
     long_description_content_type="text/x-rst",
-    name="py-slippi",
+    name="py_slippi",
     packages=setuptools.find_packages(),
     python_requires='~=3.7',
     tests_require=['mypy', 'types-termcolor'],

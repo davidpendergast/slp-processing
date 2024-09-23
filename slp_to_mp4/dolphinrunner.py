@@ -1,6 +1,5 @@
 import os, sys, subprocess, time, shutil, uuid, json, configparser
 
-MAX_WAIT_SECONDS = 8 * 60 + 30
 RESOLUTION_DICT = {'480p': '2', '720p': '3', '1080p': '5', '1440p': '6', '2160p': '8'}
 
 
@@ -246,7 +245,7 @@ class DolphinRunner:
             start_timer = time.perf_counter()
             while self.count_frames_completed() < num_frames:
 
-                if time.perf_counter() - start_timer > MAX_WAIT_SECONDS:
+                if time.perf_counter() - start_timer > self.conf.max_render_time_per_slp_secs > 0:
                     print("WARNING: Timed out waiting for render")
                     break
 

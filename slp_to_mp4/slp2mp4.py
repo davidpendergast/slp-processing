@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import os, sys, shutil, uuid, multiprocessing, tempfile, traceback
 
-# need newer (unpublished) version of py-slippi, for skip_frames option.
-sys.path.append("py-slippi/")
-from slippi import Game
+# need newer (unpublished) version of py_slippi, for skip_frames option.
+from py_slippi.slippi import Game
 
 from slp_to_mp4.config import Config
 from slp_to_mp4.dolphinrunner import DolphinRunner
@@ -19,7 +18,7 @@ def record_slp(conf: Config, slp_file, outfile):
     :param slp_file: filepath of the slp.
     :param outfile: mp4 filepath to create.
     """
-    # Parse file with py-slippi to determine number of frames
+    # Parse file with py_slippi to determine number of frames
     slippi_game = Game(slp_file)  # TODO parse without reading frames
     num_frames = slippi_game.metadata.duration + conf.extra_frames
 
