@@ -501,6 +501,15 @@ class Stage(IntEnum):
     BATTLEFIELD = 31
     FINAL_DESTINATION = 32
 
+    UNKNOWN = -1
+
+    @staticmethod
+    def parse_stage_id(sid):
+        try:
+            return Stage(sid)
+        except ValueError:
+            return Stage.UNKNOWN
+
 
 class Item(IntEnum):
     CAPSULE = 0x00

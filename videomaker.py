@@ -119,8 +119,7 @@ def parse_spec_file(fpath) -> typing.List[MeleeSet]:
 
     if cur_name is not None and len(cur_files) > 0:
         res.append(MeleeSet(cur_name, cur_files))
-    # TODO bad idea to sort, wii timestamps are often wrong, can we do better?
-    # res.sort()  # sort chronologically
+
     return res
 
 
@@ -128,6 +127,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("slp video creator")
     parser.add_argument("-spec", help="text file containing the list of sets", type=str)
     parser.add_argument("-dest", help="directory to write the mp4s", type=str)
+    parser.add_argument("-nosort", action='store_true', help="flag that prevents slps from being sorted by timestamp within sets")
 
     args = parser.parse_args()
     specfile = args.spec
@@ -169,11 +169,14 @@ if __name__ == "__main__":
     fails = []
     for v in vids:
         try:
-            # sort by filename which should start with the timestamp
-            sorted_filepaths = sorted(v.filepaths, key=lambda x: os.path.split(x)[1])
+            if args.nosort:
+                all_filepaths = list(v.filepaths)
+            else:
+                # sort by filename which should start with the timestamp
+                all_filepaths = sorted(v.filepaths, key=lambda x: os.path.split(x)[1])
 
             outfile = os.path.join(dest_dir, v.get_output_filename())
-            slp2mp4.record_and_combine_slps(conf, sorted_filepaths, outfile)
+            slp2mp4.record_and_combine_slps(conf, all_filepaths, outfile)
 
             if os.path.exists(outfile):
                 bytesize = os.path.getsize(outfile)

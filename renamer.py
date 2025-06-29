@@ -13,9 +13,12 @@ import utils
 import py_slippi.slippi as slippi  # py_slippi, parsing library for slp files
 
 
-def calc_new_filename(fpath) -> typing.Union[str, None]:
+_FILTER_INCOMPLETE_SINGLE_PLAYER_GAMES = True
+
+
+def calc_new_filename(fpath) -> typing.Tuple[typing.Union[str, None], str]:
     if not fpath.endswith('.slp'):
-        return None
+        return None, "ERROR"
 
     try:
         game = slippi.Game(fpath)
@@ -29,7 +32,10 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
         # except IOError:
         print(f"ERROR: failed to parse: {fpath}")
         traceback.print_exc()
-        return None
+        return None, "ERROR"
+
+    if _should_filter(game):
+        return None, "FILTERED"
 
     date = game.metadata.date.strftime('%Y%m%d')
     time = game.metadata.date.strftime('%H%M%S')
@@ -45,6 +51,15 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
     else:
         player_text = "_".join(players)  # dubs?
 
+    if _is_stadium_mode(game):
+        desc = _get_stadium_mode_desc(game)
+    else:
+        desc = _get_vs_mode_desc(game)
+
+    return f"{date}T{time}_{player_text}{desc}.slp", "GOOD"
+
+
+def _get_vs_mode_desc(game):
     gametime = utils.ms_to_timestamp(int(game.metadata.duration / 60 * 1000))
     stage = _get_stage_code(game.start.stage)
 
@@ -57,7 +72,55 @@ def calc_new_filename(fpath) -> typing.Union[str, None]:
     else:
         endstate = ""
 
-    return f"{date}T{time}_{player_text}_{gametime}_{stage}{endstate}.slp"
+    return f"_{gametime}_{stage}{endstate}"
+
+
+def _is_stadium_mode(game):
+    # TODO should actually ID the stages
+    return game.start.stage == slippi.id.Stage.UNKNOWN
+
+
+def _is_btt(game):
+    return len([p for p in game.start.players if p is not None]) == 1
+
+
+def _is_hrc(game):
+    return len([p for p in game.start.players if p is not None and p.character == slippi.id.CSSCharacter.SANDBAG]) == 1
+
+
+def _get_stadium_mode_desc(game):
+    mode = ""
+    if _is_btt(game):
+        # TODO can check stage ids of BTT stages
+        mode = "_BTT"
+    elif _is_hrc(game):
+        mode = "_HRC"
+
+    endstate = ""
+    if game.end.method == slippi.event.End.Method.FAILURE:
+        endstate = ""
+    elif game.end.method == slippi.event.End.Method.RETRY:
+        endstate = ""
+    elif game.end.method in (slippi.event.End.Method.COMPLETE, slippi.event.End.Method.NEW_RECORD):
+        if _is_btt(game):
+            n_frames = game.metadata.duration - 124  # rm bonus frames before timer starts
+            ms = round(n_frames / 60 * 1000)
+        else:
+            ms = round(game.metadata.duration / 60 * 1000)
+        endstate = f"_{utils.ms_to_stadium_timestamp(ms)}"
+    elif game.end.method == slippi.event.End.Method.NO_CONTEST:
+        endstate = ""  # when sandbag gets zero distance
+
+    return f"{mode}{endstate}"
+
+
+def _should_filter(game):
+    if _FILTER_INCOMPLETE_SINGLE_PLAYER_GAMES and _is_stadium_mode(game):
+        return game.end.method in (slippi.event.End.Method.FAILURE,
+                                   slippi.event.End.Method.RETRY,
+                                   slippi.event.End.Method.NO_CONTEST)
+    else:
+        return False
 
 
 STAGE_MAPPINGS = {
@@ -195,12 +258,18 @@ if __name__ == "__main__":
     print(f"\nCalculating new names...")
 
     fails = []  # files that failed to parse (can occur if wii is shutoff improperly)
+    filtered = []
     renames = {}  # orig_filepath -> new_filepath
     for idx, fpath in enumerate(all_slps):
-        new_fname = calc_new_filename(fpath)
+        new_fname, status = calc_new_filename(fpath)
         if new_fname is None:
-            fails.append(fpath)
-            print(f"ERROR {fpath}")
+            if status == "ERROR":
+                fails.append(fpath)
+                print(f"ERROR {fpath}")
+            elif status == "FILTERED":
+                filtered.append(fpath)
+            else:
+                print(f"ERROR: {fpath} (unexpected status: {status})")
         else:
             rel_fpath = os.path.relpath(fpath, src_dir)
             new_rel_fpath = list(os.path.split(rel_fpath))
@@ -211,6 +280,9 @@ if __name__ == "__main__":
     delim = '\n  '
     if len(fails) > 0:
         print(f"\n{len(fails)} slp files couldn't be parsed (probably due to corruption):\n{delim.join(fails)}")
+
+    if len(filtered) > 0:
+        print(f"\n{len(filtered)} slp files were filtered.")
 
     proceed = utils.ask_yes_or_no_question(f"Copy {len(renames)} renamed files to {dest_dir}?")
     if not proceed:

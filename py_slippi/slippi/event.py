@@ -51,7 +51,7 @@ class Start(Base):
 
         stream.read(5)
         (stage,) = unpack('H', stream)
-        stage = sid.Stage(stage)
+        stage = sid.Stage.parse_stage_id(stage)
 
         stream.read(80)
         players = []
@@ -245,13 +245,16 @@ class End(Base):
             return NotImplemented
         return self.method is other.method
 
-
     class Method(IntEnum):
         INCONCLUSIVE = 0 # `obsoleted(2.0.0)`
         TIME = 1 # `added(2.0.0)`
         GAME = 2 # `added(2.0.0)`
         CONCLUSIVE = 3 # `obsoleted(2.0.0)`
+        FAILURE = 4 # 'added by Ghast'
+        COMPLETE = 6 # `added by Ghast`
         NO_CONTEST = 7 # `added(2.0.0)`
+        RETRY = 8 # `added by Ghast`
+        NEW_RECORD = 9 # `added by Ghast`
 
 
 class Frame(Base):

@@ -33,3 +33,15 @@ def ms_to_timestamp(duration_ms) -> str:
                 f"{str(duration_secs % 60).zfill(2)}")
     else:
         return f"{duration_secs // 60}m{str(duration_secs % 60).zfill(2)}"
+
+
+def ms_to_stadium_timestamp(duration_ms) -> str:
+    if duration_ms > 60_000:
+        return ms_to_timestamp(duration_ms)
+    else:
+        secs = duration_ms // 1000
+        ms = duration_ms - secs * 1000
+        if ms >= 995:
+            secs += 1
+            ms = 0
+        return f"{str(secs).zfill(2)}s{str(round(ms / 10)).zfill(2)}"
