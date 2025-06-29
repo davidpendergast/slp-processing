@@ -141,6 +141,8 @@ def _get_player_text(game, port):
     elif pdata.type != slippi.event.Start.Player.Type.HUMAN:  # 0:HUMAN
         return "CPU"
     else:
+        portcode = f"(P{port + 1})"
+
         charcode = _get_character_code(pdata.character)
         colorcode = _get_character_color_code(pdata.character, pdata.costume)
         if len(colorcode) > 0:
@@ -158,7 +160,7 @@ def _get_player_text(game, port):
                 stocks = lastframe.ports[port].leader.post.stocks
                 winstate = f"({'L' if stocks == 0 else 'W'}{stocks})"
 
-        return f"{charcode}{colorcode}{tag}{winstate}"
+        return f"{portcode}{charcode}{colorcode}{tag}{winstate}"
 
 
 def _lookup_enum(enum_cls, name) -> enum.IntEnum:
