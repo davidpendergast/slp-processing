@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import sys
 import tempfile
@@ -123,18 +124,47 @@ def parse_spec_file(fpath) -> typing.List[MeleeSet]:
     return res
 
 
+def parse_sets_from_dir(fpath) -> typing.List[MeleeSet]:
+    res = []
+    tourney_id = os.path.split(fpath)[1]
+
+    for dname in os.listdir(fpath):
+        set_dpath = os.path.join(fpath, dname)
+        slp_files = []
+        for fname in os.listdir(set_dpath):
+            if fname.endswith(".slp"):
+                slp_files.append(os.path.join(set_dpath, fname))
+
+        with open(os.path.join(set_dpath, "context.json")) as f:
+            context = json.load(f)
+        p1 = context['players']['entrant1'][0]['name']
+        p2 = context['players']['entrant2'][0]['name']
+        round = "Pools" if context['startgg']['phase']['name'] == "Pools" else context['startgg']['set']['fullRoundText']
+        set_name = f"{tourney_id} {p1} vs {p2} {round}"  # TODO compress round to WR1, LR3
+
+        res.append(MeleeSet(set_name, slp_files))
+
+    return res
+
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("slp video creator")
-    parser.add_argument("-spec", help="text file containing the list of sets", type=str)
+    parser.add_argument("-spec", help="text file containing the list of sets, or a directory to parse sets from automatically", type=str)
     parser.add_argument("-dest", help="directory to write the mp4s", type=str)
     parser.add_argument("-nosort", action='store_true', help="flag that prevents slps from being sorted by timestamp within sets")
 
     args = parser.parse_args()
-    specfile = args.spec
-    if args.dest is not None:
-        dest_dir = args.dest
+
+    if os.path.isdir(args.spec):
+        dest_dir = args.dest if args.dest is not None else os.path.join(args.spec, "videos")
+        specfile = f"(automatic mode - {args.spec}/)"
+        vids = parse_sets_from_dir(args.spec)
     else:
-        dest_dir = os.path.join(os.path.split(specfile)[0], "videos")
+        specfile = args.spec
+        dest_dir = args.dest if args.dest is not None else os.path.join(os.path.split(specfile)[0], "videos")
+        vids = parse_spec_file(specfile)
+
     print(f"\nWelcome to SLP Video Creator\n  spec file: {specfile}\n  output directory: {dest_dir}")
 
     conf = slp2mp4.Config('my_config.json' if os.path.exists('my_config.json') else 'config.json')
@@ -143,7 +173,6 @@ if __name__ == "__main__":
     total_video_duration_ms = 0
     total_filesize_mb = 0
 
-    vids = parse_spec_file(specfile)
     print(f"\nFound {len(vids)} set(s) with {sum([len(v.filepaths) for v in vids])} total SLP(s):")
     for v in vids:
         processing_time_ms = v.get_approx_processing_time_ms(conf=conf)
