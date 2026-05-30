@@ -130,13 +130,20 @@ def parse_sets_from_dir(fpath) -> typing.List[MeleeSet]:
 
     for dname in os.listdir(fpath):
         set_dpath = os.path.join(fpath, dname)
+
         slp_files = []
         for fname in os.listdir(set_dpath):
             if fname.endswith(".slp"):
                 slp_files.append(os.path.join(set_dpath, fname))
+        if len(slp_files) == 0:
+            continue
 
-        with open(os.path.join(set_dpath, "context.json")) as f:
-            context = json.load(f)
+        try:
+            with open(os.path.join(set_dpath, "context.json")) as f:
+                context = json.load(f)
+        except FileNotFoundError:
+            continue
+
         p1 = context['players']['entrant1'][0]['name']
         p2 = context['players']['entrant2'][0]['name']
         round = "Pools" if context['startgg']['phase']['name'] == "Pools" else context['startgg']['set']['fullRoundText']
@@ -202,6 +209,7 @@ if __name__ == "__main__":
                 all_filepaths = list(v.filepaths)
             else:
                 # sort by filename which should start with the timestamp
+                # TODO number-aware sort for slp replay-style filenames
                 all_filepaths = sorted(v.filepaths, key=lambda x: os.path.split(x)[1])
 
             outfile = os.path.join(dest_dir, v.get_output_filename())
