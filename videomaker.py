@@ -1,11 +1,9 @@
 import argparse
 import json
 import os
-import sys
-import tempfile
-import shutil
 import traceback
 import typing
+
 from functools import total_ordering
 
 # need newer (unpublished) version of py_slippi, for skip_frames option.
@@ -21,7 +19,7 @@ class MeleeSet:
 
     def __init__(self, name, filepaths):
         self.name = name
-        self.filepaths = filepaths
+        self.filepaths = utils.natsort(filepaths, key=lambda x: os.path.split(x)[1])
 
         self._parsed_metadata = None
 
@@ -84,10 +82,9 @@ class MeleeSet:
         return int(mb_per_ms * duration_ms)
 
     def __lt__(self, other: 'MeleeSet'):
-        # sort by filenames, which should begin with timestamps
-        my_filenames = list(map(lambda fpath: os.path.split(fpath)[1], self.filepaths))
-        other_filenames = list(map(lambda fpath: os.path.split(fpath)[1], other.filepaths))
-        return my_filenames < other_filenames
+        # just gives a consistent ordering
+        l = [other.filepaths[0], self.filepaths[0]]
+        return l != utils.natsort(l)
 
 
 def parse_spec_file(fpath) -> typing.List[MeleeSet]:
@@ -159,7 +156,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("slp video creator")
     parser.add_argument("-spec", help="text file containing the list of sets, or a directory to parse sets from automatically", type=str)
     parser.add_argument("-dest", help="directory to write the mp4s", type=str)
-    parser.add_argument("-nosort", action='store_true', help="flag that prevents slps from being sorted by timestamp within sets")
 
     args = parser.parse_args()
 
@@ -205,13 +201,7 @@ if __name__ == "__main__":
     fails = []
     for v in vids:
         try:
-            if args.nosort:
-                all_filepaths = list(v.filepaths)
-            else:
-                # sort by filename which should start with the timestamp
-                # TODO number-aware sort for slp replay-style filenames
-                all_filepaths = sorted(v.filepaths, key=lambda x: os.path.split(x)[1])
-
+            all_filepaths = list(v.filepaths)
             outfile = os.path.join(dest_dir, v.get_output_filename())
             slp2mp4.record_and_combine_slps(conf, all_filepaths, outfile)
 

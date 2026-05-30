@@ -1,3 +1,5 @@
+import typing
+import re
 
 
 def progress_bar(current, total, bar_width, bonus_text=""):
@@ -45,3 +47,17 @@ def ms_to_stadium_timestamp(duration_ms) -> str:
             secs += 1
             ms = 0
         return f"{str(secs).zfill(2)}s{str(round(ms / 10)).zfill(2)}"
+
+
+def natsort(str_list: typing.List[str], key=lambda x: x) -> typing.List[str]:
+    def _split_preserving_numbers(text):
+        items = re.split(r'([^0-9]+)', text)
+        ret = []
+        for item in items:
+            try:
+                ret.append((0, int(item)))
+            except ValueError:
+                ret.append((1, item))
+        return ret
+
+    return list(sorted(str_list, key=lambda x: _split_preserving_numbers(key(x))))
